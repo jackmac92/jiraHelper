@@ -1,0 +1,17 @@
+{
+  "name": "cbiJira",
+  "version": "1.1.0",
+  "main": "bundle.js",
+  "license": "MIT",
+  "scripts": {
+    "prepublish": "npm build",
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "rollup": "^0.41.6"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "jira": "^0.9.2"
+  }
+}
