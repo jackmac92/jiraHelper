@@ -34,3 +34,4 @@ export const getTickets = () =>
     )
     .then(filterCompletedIssues)
     .then(issuesInfo => issuesInfo.forEach(echo));
+
