@@ -41,6 +41,7 @@ const getTickets = () =>
     )
     .then(filterCompletedIssues)
     .then(issuesInfo => issuesInfo.forEach(echo));
+getTickets();
 
 require.main === module && getTickets();
 

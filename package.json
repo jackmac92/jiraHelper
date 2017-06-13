@@ -6,7 +6,7 @@
   "scripts": {
     "prepublish": "npm run build",
     "build": "rollup -c",
-    "postbuild": "git add bundle.js",
+    "postbuild": "git add bundle.js"
   },
   "devDependencies": {
     "rollup": "^0.41.6"
