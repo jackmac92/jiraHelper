@@ -1,10 +1,11 @@
 import { JiraApi } from 'jira';
-import config from './config';
 import Promise from 'bluebird';
 
 const echo = console.log;
 
-const { username, password } = config;
+const username = process.env.JIRA_USERNAME;
+const password = process.env.JIRA_PASSWORD;
+
 const scheme = 'https';
 const host = 'cbinsights.atlassian.net';
 const port = 443;
@@ -34,3 +35,5 @@ export const getTickets = () =>
     )
     .then(filterCompletedIssues)
     .then(issuesInfo => issuesInfo.forEach(echo));
+
+require.main === module && getTickets();

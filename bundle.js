@@ -7,14 +7,11 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var jira = require('jira');
 var Promise = _interopDefault(require('bluebird'));
 
-var config = {
-  username: 'jmccown@cbinsights.com',
-  password: 'Dashah7992'
-};
-
 const echo = console.log;
 
-const { username, password } = config;
+const username = process.env.JIRA_USERNAME;
+const password = process.env.JIRA_PASSWORD;
+
 const scheme = 'https';
 const host = 'cbinsights.atlassian.net';
 const port = 443;
@@ -44,5 +41,7 @@ const getTickets = () =>
     )
     .then(filterCompletedIssues)
     .then(issuesInfo => issuesInfo.forEach(echo));
+
+require.main === module && getTickets();
 
 exports.getTickets = getTickets;
