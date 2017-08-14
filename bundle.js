@@ -5,7 +5,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var jira = require('jira');
-var Promise = _interopDefault(require('bluebird'));
+var bluebird = _interopDefault(require('bluebird'));
+var Fetcher = _interopDefault(require('localApi'));
+
+global.Promise = bluebird;
 
 const echo = console.log;
 
@@ -27,22 +30,49 @@ const jira$1 = new jira.JiraApi(
   debug
 );
 
-Promise.promisifyAll(jira$1, { suffix: 'Async' });
+bluebird.promisifyAll(jira$1, { suffix: 'Async' });
 
-const filterCompletedIssues = issues =>
-  issues.filter(i => i.fields.status.id !== '10001');
+const issueIsCompleted = issue => issue.status.id !== '10001';
+const issueIsInCurrentSprint = issue => false;
+
+const filterCompletedIssues = issues => issues.filter(issueIsCompleted);
+const filterBacklog = issues => issues.filter(issueIsInCurrentSprint);
+
+const formatTicket = ({ key, fields }) => ({
+  key,
+  desc: fields.description,
+  status: fields.status,
+  summary: fields.summary
+});
+const tryfromat = thing => {
+  try {
+    return formatTicket(thing);
+  } catch (e) {
+    return {};
+  }
+};
+const fetcher = new Fetcher({
+  doRequest: key => jira$1.findIssueAsync(key).then(tryfromat),
+  getKey: key => `${key}`,
+  storage: './cache'
+});
+
+const getIssueDetails = ({ key }) => fetcher.get(key);
 
 const getTickets = () =>
   jira$1
     .getCurrentUserAsync()
     .then(({ name }) => jira$1.getUsersIssuesAsync(name, false))
-    .then(({ issues }) =>
-      Promise.all(issues.map(i => jira$1.findIssueAsync(i.key)))
-    )
-    .then(filterCompletedIssues)
-    .then(issuesInfo => issuesInfo.forEach(echo));
-getTickets();
+    .then(({ issues }) => Promise.all(issues.map(getIssueDetails)));
 
-require.main === module && getTickets();
+const getIncompleteTickets = () =>
+  getTickets().then(filterCompletedIssues);
+
+const getTodoList = () => getIncompleteTickets().then(filterBacklog);
+
+require.main === module &&
+  getTickets().then(issuesInfo => issuesInfo.forEach(echo));
 
 exports.getTickets = getTickets;
+exports.getIncompleteTickets = getIncompleteTickets;
+exports.getTodoList = getTodoList;

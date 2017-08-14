@@ -6,6 +6,13 @@ async@~0.2.7:
   version "0.2.10"
   resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
 
+axios@^0.16.2:
+  version "0.16.2"
+  resolved "https://npm.jackmac.party/axios/-/axios-0.16.2.tgz#ba4f92f17167dfbab40983785454b9ac149c3c6d"
+  dependencies:
+    follow-redirects "^1.2.3"
+    is-buffer "^1.1.5"
+
 bluebird@^3.5.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
@@ -16,9 +23,21 @@ combined-stream@~0.0.4:
   dependencies:
     delayed-stream "0.0.5"
 
+debug@^2.4.5:
+  version "2.6.8"
+  resolved "https://npm.jackmac.party/debug/-/debug-2.6.8.tgz#e731531ca2ede27d188222427da17821d68ff4fc"
+  dependencies:
+    ms "2.0.0"
+
 delayed-stream@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/delayed-stream/-/delayed-stream-0.0.5.tgz#d4b1f43a93e8296dfe02694f4680bc37a313c73f"
+
+follow-redirects@^1.2.3:
+  version "1.2.3"
+  resolved "https://npm.jackmac.party/follow-redirects/-/follow-redirects-1.2.3.tgz#01abaeca85e3609837d9fcda3167a7e42fdaca21"
+  dependencies:
+    debug "^2.4.5"
 
 form-data@~0.0.3:
   version "0.0.10"
@@ -28,6 +47,10 @@ form-data@~0.0.3:
     combined-stream "~0.0.4"
     mime "~1.2.2"
 
+is-buffer@^1.1.5:
+  version "1.1.5"
+  resolved "https://npm.jackmac.party/is-buffer/-/is-buffer-1.1.5.tgz#1f3b26ef613b214b88cbca23cc6c01d87961eecc"
+
 jira@^0.9.2:
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/jira/-/jira-0.9.2.tgz#2b478c79564d3d8d210f9a6e3406c09a0b76caa0"
@@ -35,9 +58,35 @@ jira@^0.9.2:
     oauth "^0.9.11"
     request "<2.16.0"
 
+localApi@^2.1.0:
+  version "2.1.0"
+  resolved "https://npm.jackmac.party/localApi/-/localApi-2.1.0.tgz#fe762ffc5910ffb4cff6bef76624a431a8f86d91"
+  dependencies:
+    axios "^0.16.2"
+    mkdirp "^0.5.1"
+    node-uuid "^1.4.8"
+
 mime@~1.2.2, mime@~1.2.7:
   version "1.2.11"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.2.11.tgz#58203eed86e3a5ef17aed2b7d9ebd47f0a60dd10"
+
+minimist@0.0.8:
+  version "0.0.8"
+  resolved "https://npm.jackmac.party/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
+
+mkdirp@^0.5.1:
+  version "0.5.1"
+  resolved "https://npm.jackmac.party/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
+  dependencies:
+    minimist "0.0.8"
+
+ms@2.0.0:
+  version "2.0.0"
+  resolved "https://npm.jackmac.party/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
+
+node-uuid@^1.4.8:
+  version "1.4.8"
+  resolved "https://npm.jackmac.party/node-uuid/-/node-uuid-1.4.8.tgz#b040eb0923968afabf8d32fb1f17f1167fdab907"
 
 oauth@^0.9.11:
   version "0.9.15"

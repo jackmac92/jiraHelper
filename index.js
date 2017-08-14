@@ -1,5 +1,8 @@
 import { JiraApi } from 'jira';
-import Promise from 'bluebird';
+import bluebird from 'bluebird';
+import Fetcher from 'localApi';
+
+global.Promise = bluebird;
 
 const echo = console.log;
 
@@ -21,19 +24,47 @@ const jira = new JiraApi(
   debug
 );
 
-Promise.promisifyAll(jira, { suffix: 'Async' });
+bluebird.promisifyAll(jira, { suffix: 'Async' });
 
-const filterCompletedIssues = issues =>
-  issues.filter(i => i.fields.status.id !== '10001');
+const issueIsCompleted = issue => issue.status.id !== '10001';
+const issueIsInCurrentSprint = issue => false;
+
+const filterCompletedIssues = issues => issues.filter(issueIsCompleted);
+const filterBacklog = issues => issues.filter(issueIsInCurrentSprint);
+
+const formatTicket = ({ key, fields }) => ({
+  key,
+  desc: fields.description,
+  status: fields.status,
+  summary: fields.summary
+});
+const tryfromat = thing => {
+  try {
+    return formatTicket(thing);
+  } catch (e) {
+    return {};
+  }
+};
+const formatTickets = tickets => tickets.map(formatTicket);
+
+const fetcher = new Fetcher({
+  doRequest: key => jira.findIssueAsync(key).then(tryfromat),
+  getKey: key => `${key}`,
+  storage: './cache'
+});
+
+const getIssueDetails = ({ key }) => fetcher.get(key);
 
 export const getTickets = () =>
   jira
     .getCurrentUserAsync()
     .then(({ name }) => jira.getUsersIssuesAsync(name, false))
-    .then(({ issues }) =>
-      Promise.all(issues.map(i => jira.findIssueAsync(i.key)))
-    )
-    .then(filterCompletedIssues)
-    .then(issuesInfo => issuesInfo.forEach(echo));
+    .then(({ issues }) => Promise.all(issues.map(getIssueDetails)));
 
-require.main === module && getTickets();
+export const getIncompleteTickets = () =>
+  getTickets().then(filterCompletedIssues);
+
+export const getTodoList = () => getIncompleteTickets().then(filterBacklog);
+
+require.main === module &&
+  getTickets().then(issuesInfo => issuesInfo.forEach(echo));
