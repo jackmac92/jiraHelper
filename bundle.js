@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var jira = require('jira');
@@ -9,8 +7,6 @@ var bluebird = _interopDefault(require('bluebird'));
 var Fetcher = _interopDefault(require('localApi'));
 
 global.Promise = bluebird;
-
-const echo = console.log;
 
 const username = process.env.JIRA_USERNAME;
 const password = process.env.JIRA_PASSWORD;
@@ -20,59 +16,77 @@ const host = 'cbinsights.atlassian.net';
 const port = 443;
 const apiVersion = '2';
 const debug = true;
-const jira$1 = new jira.JiraApi(
-  scheme,
-  host,
-  port,
-  username,
-  password,
-  apiVersion,
-  debug
-);
-
-bluebird.promisifyAll(jira$1, { suffix: 'Async' });
 
 const issueIsCompleted = issue => issue.status.id !== '10001';
-const issueIsInCurrentSprint = issue => false;
-
 const filterCompletedIssues = issues => issues.filter(issueIsCompleted);
-const filterBacklog = issues => issues.filter(issueIsInCurrentSprint);
-
 const formatTicket = ({ key, fields }) => ({
   key,
   desc: fields.description,
   status: fields.status,
   summary: fields.summary
 });
-const tryfromat = thing => {
+const tryformat = thing => {
   try {
     return formatTicket(thing);
   } catch (e) {
     return {};
   }
 };
-const fetcher = new Fetcher({
-  doRequest: key => jira$1.findIssueAsync(key).then(tryfromat),
-  getKey: key => `${key}`,
-  storage: './cache'
-});
 
-const getIssueDetails = ({ key }) => fetcher.get(key);
+// const formatTickets = tickets => tickets.map(formatTicket);
 
-const getTickets = () =>
-  jira$1
-    .getCurrentUserAsync()
-    .then(({ name }) => jira$1.getUsersIssuesAsync(name, false))
-    .then(({ issues }) => Promise.all(issues.map(getIssueDetails)));
+// const getIssueDetails = ({ key }) => fetcher.get(key);
 
-const getIncompleteTickets = () =>
-  getTickets().then(filterCompletedIssues);
+// export const getTickets = () =>
+//   jira
+//     .getCurrentUserAsync()
+//     .then(({ name }) => jira.getUsersIssuesAsync(name, false))
+//     .then(({ issues }) => Promise.all(issues.map(getIssueDetails)));
 
-const getTodoList = () => getIncompleteTickets().then(filterBacklog);
+// export const getIncompleteTickets = () =>
+//   getTickets().then(filterCompletedIssues);
 
-require.main === module &&
-  getTickets().then(issuesInfo => issuesInfo.forEach(echo));
+// export const getTodoList = () => getIncompleteTickets().then(filterBacklog);
 
-exports.getTickets = getTickets;
-exports.getIncompleteTickets = getIncompleteTickets;
-exports.getTodoList = getTodoList;
+class JiraFetcher {
+  constructor({ dir, username, password }) {
+    this.jiraApi = new jira.JiraApi(
+      scheme,
+      host,
+      port,
+      username,
+      password,
+      apiVersion,
+      debug
+    );
+    bluebird.promisifyAll(this.jiraApi, { suffix: 'Async' });
+    const ticketFetcher = new Fetcher({
+      doRequest: key => this.jiraApi.findIssueAsync(key).then(tryformat),
+      getKey: key => `${key}`,
+      storage: dir
+    });
+    this.getTicket = ({ key }) => ticketFetcher.get(key);
+    this.getAll = this.getAll.bind(this);
+    this.getToDos = this.getToDos.bind(this);
+  }
+
+  getAll() {
+    return this.jiraApi
+      .getCurrentUserAsync()
+      .then(({ name }) => this.jiraApi.getUsersIssuesAsync(name, false))
+      .then(({ issues }) => Promise.all(issues.map(this.getTicket)));
+  }
+  getToDos() {
+    return this.getAll().then(filterCompletedIssues);
+  }
+}
+
+// require.main === module &&
+//   getIncompleteTickets().then(issuesInfo => issuesInfo.forEach(echo)) &&
+//   getIncompleteTickets().then(issuesInfo => echo(issuesInfo.length)) &&
+//   getTodoList().then(issuesInfo => echo(issuesInfo.length));
+
+const j = new JiraFetcher({ dir: './cache', username, password });
+j.getToDos().then(console.log);
+
+module.exports = JiraFetcher;
